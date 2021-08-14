@@ -1,7 +1,7 @@
 # 절대 모멘텀 전략
 # 0. Input parameter 입력
 # 1. 데이터 가져오기
-# 2. 절대모멘텀 trading signal 생성
+# 2. trading signal 생성
 # 3. 수익률 계산
 # 4. 결과비교
 
@@ -24,7 +24,6 @@ df = pdr.get_data_yahoo(TICKER, start = start_date, end = end_date)
 price_df = df.loc[:,['Adj Close']].copy()
 price_df = price_df.rename_axis('Date').reset_index()
 price_df['Date'] = pd.to_datetime(price_df['Date'])
-# book = price_df.copy()
 
 # 2. trading signal 생성
 def get_am_signal(price_df, lookback_m1, lookback_m2) :
