@@ -13,10 +13,10 @@ import FinanceDataReader as fdr
 import matplotlib.pyplot as plt
 
 # 0. parameter 입력
-TICKER = ['SPY', 'QQQ', 'EFA', 'IWD', 'IJH', 'IWM', 'XLK', 'VNQ']
+TICKER = ['XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK', 'XLU']
 selected_num = 3
 lookback = 1
-start_date = '2020-06-01'
+start_date = '2020-07-01'
 end_date = datetime.datetime.today()
 
 # 1. 데이터 가져오기
@@ -89,7 +89,7 @@ def get_rm_return(df,signal) :
     book = pd.merge(df[['Date','YYYY-MM']], signal, on = 'YYYY-MM', how = 'left')
     book.set_index(['Date'],inplace=True)
     book = book[TICKER].astype(float)
-    df = df[['Date', 'SPY', 'QQQ', 'EFA', 'IWD','IJH','XLK','VNQ']]
+    df = df[['Date', 'XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK', 'XLU']]
     df.set_index(['Date'],inplace=True)
     df = df.pct_change().fillna(0)
     result = pd.DataFrame(((book * df) * 1 / selected_num).sum(axis=1))
