@@ -14,9 +14,9 @@ import matplotlib.pyplot as plt
 
 # 0. parameter 입력
 TICKER = ['XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK', 'XLU']
-selected_num = 3
+selected_num = 1
 lookback = 1
-start_date = '2021-07-01'
+start_date = '2020-08-01'
 end_date = datetime.datetime.today()
 
 # 1. 데이터 가져오기
@@ -61,7 +61,7 @@ def get_rm_signal(df, lookback) :
         rebal_date = rebal_date.append(df[df.index.map(lambda x : datetime.datetime.strftime(x, '%Y-%m')) == m].iloc[-1])
     rebal_date.columns = TICKER
     rebal_date = rebal_date/rebal_date.shift(lookback)
-    signal = pd.DataFrame((rebal_date.rank(axis=1, ascending = False) <= selected_num).applymap(lambda x : '1' if x else '0'))
+    signal = pd.DataFrame((rebal_date.rank(axis=1, ascending = False) <= selected_num).applymap(lambda x : '1' if x == True else '0'))
     signal = signal.shift(1).fillna(0)
     return signal
 
