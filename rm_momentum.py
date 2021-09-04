@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 TICKER = ['XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK', 'XLU']
 selected_num = 3
 lookback = 1
-start_date = '2020-07-01'
+start_date = '2021-07-01'
 end_date = datetime.datetime.today()
 
 # 1. 데이터 가져오기
