@@ -117,7 +117,7 @@ def get_srp ( x ):
 
 
 df_mdd = get_mdd(bm['Close'].iloc[:]) * 100
-df_cagr = get_cagr(dm_result.iloc[:]) * 100
+# df_cagr = get_cagr(dm_result.iloc[:]) * 100
 df_cagr = get_cagr(((1+dm_result).cumprod()-1).iloc[:]) * 100
 df_vol = get_vol(dm_result.iloc[:]) * 100
 df_srp = get_srp(dm_result.iloc[:])
