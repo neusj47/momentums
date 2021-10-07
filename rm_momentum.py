@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 TICKER = ['XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK', 'XLU']
 selected_num = 1
 lookback = 1
-start_date = '2020-08-01'
+start_date = '2020-07-01'
 end_date = datetime.datetime.today()
 
 # 1. 데이터 가져오기
@@ -54,7 +54,7 @@ def get_rm_signal(df, lookback) :
                  -------
                  signal : dataframe
                      Trading signal for Relative Momentum
-     '''
+    '''
     month_list = df.index.map(lambda x : datetime.datetime.strftime(x, '%Y-%m')).unique()
     rebal_date= pd.DataFrame()
     for m in month_list:
