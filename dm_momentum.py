@@ -1,21 +1,19 @@
-from pykrx import stock
+
 import pandas as pd
-import requests
-import json
 import datetime
 import FinanceDataReader as fdr
 import numpy as np
 
 
 # 0. parameter 입력
-start_date = '2018-06-15'
+start_date = '2015-09-15'
 end_date = datetime.datetime.today()
 TICKER = ['285000', '287300', '287310', '284980', '287320', '287330', '284990', '285010', '285020', '315480', '253280']
 TICKER_name = ['KBSTAR 200IT','KBSTAR 200건설','KBSTAR 200경기소비재','KBSTAR 200금융','KBSTAR 200산업재','KBSTAR 200생활소비재','KBSTAR 200에너지화학'
                ,'KBSTAR 200중공업','KBSTAR 200철강소재','KBSTAR 200커뮤니케이션서비스','KBSTAR 헬스케어']
 lookback_m = 1
 lookback_d = lookback_m * 30
-selected_num = 2
+selected_num = 3
 
 bm = pd.DataFrame(fdr.DataReader('148020', start_date, end_date)['Close'])
 
@@ -33,7 +31,11 @@ def get_rm_signal_m(df, lookback_m, selected_num) :
     month_list = df.index.map(lambda x : datetime.datetime.strftime(x, '%Y-%m')).unique()
     rebal_date= pd.DataFrame()
     for m in month_list:
-        rebal_date = rebal_date.append(df[df.index.map(lambda x : datetime.datetime.strftime(x, '%Y-%m'))== m].iloc[-1])
+        try:
+            rebal_date = rebal_date.append(df[df.index.map(lambda x: datetime.datetime.strftime(x, '%Y-%m')) == m].iloc[-1])
+        except Exception as e:
+            print("Error : ", str(e))
+        pass
     rebal_date.columns = TICKER_name
     rebal_date = rebal_date/rebal_date.shift(lookback_m)
     recent_returns = df.pct_change(lookback_m*30)

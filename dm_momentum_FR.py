@@ -1,4 +1,4 @@
-# 상대모멘텀 전략
+# 듀얼모멘텀 전략
 # 0. parameter 입력
 # 1. 데이터 가져오기
 # 2. trading signal 생성하기
@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 import datetime
 import pandas_datareader as pdr
-import FinanceDataReader as fdr
 import matplotlib.pyplot as plt
 
 # 0. parameter 입력
@@ -17,7 +16,7 @@ TICKER = ['XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK',
 selected_num = 1
 lookback_m = 1
 lookback_d = lookback_m * 30
-start_date = '2018-07-01'
+start_date = '2015-09-30'
 end_date = datetime.datetime.today()
 
 # 1. 데이터 가져오기
@@ -60,7 +59,12 @@ def get_rm_signal_m(df, lookback_m,selected_num) :
     month_list = df.index.map(lambda x : datetime.datetime.strftime(x, '%Y-%m')).unique()
     rebal_date= pd.DataFrame()
     for m in month_list:
-        rebal_date = rebal_date.append(df[df.index.map(lambda x : datetime.datetime.strftime(x, '%Y-%m')) == m].iloc[-1])
+        try:
+            rebal_date = rebal_date.append(
+                df[df.index.map(lambda x: datetime.datetime.strftime(x, '%Y-%m')) == m].iloc[-1])
+        except Exception as e:
+            print("Error : ", str(e))
+        pass
     rebal_date.columns = TICKER
     rebal_date = rebal_date/rebal_date.shift(lookback_m)
     recent_returns = df.pct_change(lookback_m*30)
@@ -74,7 +78,7 @@ rm_signal_m = get_rm_signal_m(df, lookback_m,selected_num)
 
 # 3. 수익률 산출하기
 
-def get_rm_return(df,signal) :
+def get_rm_return(df,signal, selected_num) :
     '''
          Parameters
                  ----------
@@ -100,7 +104,7 @@ def get_rm_return(df,signal) :
     result = pd.DataFrame(((book * df) * 1 / selected_num).sum(axis=1))
     return result, rm_signal
 
-rm_signal = get_rm_return(df,rm_signal_m)[1]
+rm_signal = get_rm_return(df,rm_signal_m, selected_num)[1]
 
 def get_am_signal(df,lookback_d) :
     df_hrtn = df.pct_change(lookback_d).fillna(0)
