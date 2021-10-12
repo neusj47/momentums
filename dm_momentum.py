@@ -8,14 +8,14 @@ import numpy as np
 
 
 # 0. parameter 입력
-start_date = '2021-06-15'
+start_date = '2018-06-15'
 end_date = datetime.datetime.today()
 TICKER = ['285000', '287300', '287310', '284980', '287320', '287330', '284990', '285010', '285020', '315480', '253280']
 TICKER_name = ['KBSTAR 200IT','KBSTAR 200건설','KBSTAR 200경기소비재','KBSTAR 200금융','KBSTAR 200산업재','KBSTAR 200생활소비재','KBSTAR 200에너지화학'
                ,'KBSTAR 200중공업','KBSTAR 200철강소재','KBSTAR 200커뮤니케이션서비스','KBSTAR 헬스케어']
 lookback_m = 1
 lookback_d = lookback_m * 30
-selected_num = 1
+selected_num = 2
 
 bm = pd.DataFrame(fdr.DataReader('148020', start_date, end_date)['Close'])
 
@@ -40,11 +40,11 @@ def get_rm_signal_m(df, lookback_m, selected_num) :
     rebal_date.iloc[len(rebal_date) - 1] = recent_returns.iloc[len(recent_returns) - 1]
     signal = (rebal_date.rank(axis=1, ascending = False) <= selected_num).applymap(lambda x : '1' if x else '0')
     signal = pd.DataFrame(signal)
-    # signal = signal.shift(1).fillna(0)
+    signal = signal.shift(1).fillna(0)
     signal = signal.astype(float)
     return signal
 
-rm_signal_m = get_rm_signal_m(df, lookback_m, 1)
+rm_signal_m = get_rm_signal_m(df, lookback_m, selected_num)
 
 def get_rm_return(df,signal,selected_num) :
     df = df.rename_axis('Date').reset_index()

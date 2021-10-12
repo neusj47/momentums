@@ -17,7 +17,7 @@ TICKER = ['XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK',
 selected_num = 1
 lookback_m = 1
 lookback_d = lookback_m * 30
-start_date = '2021-07-01'
+start_date = '2018-07-01'
 end_date = datetime.datetime.today()
 
 # 1. 데이터 가져오기
@@ -44,7 +44,7 @@ df = get_data(TICKER, start_date, end_date)
 bm = pd.DataFrame(pdr.get_data_yahoo('SPY', start = start_date, end = end_date)['Adj Close'])
 
 # 2. trading signal 생성하기
-def get_rm_signal_m(df, lookback_m) :
+def get_rm_signal_m(df, lookback_m,selected_num) :
     '''
          Parameters
                  ----------
@@ -66,11 +66,11 @@ def get_rm_signal_m(df, lookback_m) :
     recent_returns = df.pct_change(lookback_m*30)
     rebal_date.iloc[len(rebal_date) - 1] = recent_returns.iloc[len(recent_returns) - 1]
     signal = pd.DataFrame((rebal_date.rank(axis=1, ascending = False) <= selected_num).applymap(lambda x : '1' if x == True else '0'))
-    # signal = signal.shift(1).fillna(0)
+    signal = signal.shift(1).fillna(0)
     signal = signal.astype(float)
     return signal
 
-rm_signal_m = get_rm_signal_m(df, lookback_m)
+rm_signal_m = get_rm_signal_m(df, lookback_m,selected_num)
 
 # 3. 수익률 산출하기
 
