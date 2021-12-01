@@ -6,16 +6,17 @@ import numpy as np
 
 
 # 0. parameter 입력
-start_date = '2015-09-15'
+start_date = '2019-09-15'
 end_date = datetime.datetime.today()
 TICKER = ['285000', '287300', '287310', '284980', '287320', '287330', '284990', '285010', '285020', '315480', '253280']
 TICKER_name = ['KBSTAR 200IT','KBSTAR 200건설','KBSTAR 200경기소비재','KBSTAR 200금융','KBSTAR 200산업재','KBSTAR 200생활소비재','KBSTAR 200에너지화학'
                ,'KBSTAR 200중공업','KBSTAR 200철강소재','KBSTAR 200커뮤니케이션서비스','KBSTAR 헬스케어']
 lookback_m = 1
-lookback_d = lookback_m * 30
+lookback_d = lookback_m * 20
 selected_num = 3
 
 bm = pd.DataFrame(fdr.DataReader('148020', start_date, end_date)['Close'])
+
 
 def get_data_rm(TICKER, start_date, end_date) :
     df = pd.DataFrame()
@@ -36,10 +37,10 @@ def get_rm_signal_m(df, lookback_m, selected_num) :
         except Exception as e:
             print("Error : ", str(e))
         pass
-    rebal_date.columns = TICKER_name
+    rebal_date.columns = sorted(TICKER_name)
     rebal_date = rebal_date/rebal_date.shift(lookback_m)
-    recent_returns = df.pct_change(lookback_m*30)
-    rebal_date.iloc[len(rebal_date) - 1] = recent_returns.iloc[len(recent_returns) - 1]
+    recent_returns = df.pct_change(lookback_m*20)
+    rebal_date.iloc[len(rebal_date) - 1] = recent_returns.iloc[len(recent_returns) - 1][sorted(recent_returns.columns)]
     signal = (rebal_date.rank(axis=1, ascending = False) <= selected_num).applymap(lambda x : '1' if x else '0')
     signal = pd.DataFrame(signal)
     signal = signal.shift(1).fillna(0)
@@ -55,11 +56,11 @@ def get_rm_return(df,signal,selected_num) :
     signal['YYYY-MM'] =signal.index.map(lambda x : datetime.datetime.strftime(x, '%Y-%m'))
     book = pd.merge(df[['Date','YYYY-MM']], signal, on = 'YYYY-MM', how = 'left')
     book.set_index(['Date'],inplace=True)
-    rm_signal = book[TICKER_name].astype(float)
+    rm_signal = book[sorted(TICKER_name)].astype(float)
     df.set_index(['Date'],inplace=True)
-    df = df[TICKER_name]
+    df = df[sorted(TICKER_name)]
     df = df.pct_change().fillna(0)
-    result = pd.DataFrame(((book * df) * 1 / selected_num).sum(axis=1))
+    result = pd.DataFrame(((rm_signal * df) * 1 / selected_num).sum(axis=1))
     return result, rm_signal
 
 def get_am_signal(df,lookback_d) :
@@ -72,7 +73,7 @@ rm_signal = get_rm_return(df,rm_signal_m,selected_num)[1]
 am_signal = get_am_signal(df,lookback_d)
 
 def get_dm_signal(rm_signal, am_signal):
-    dm_signal = am_signal * rm_signal
+    dm_signal = rm_signal * am_signal
     dm_signal = dm_signal.astype(float)
     return dm_signal
 

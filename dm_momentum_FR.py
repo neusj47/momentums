@@ -13,9 +13,9 @@ import matplotlib.pyplot as plt
 
 # 0. parameter 입력
 TICKER = ['XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK', 'XLU']
-selected_num = 1
+selected_num = 3
 lookback_m = 1
-lookback_d = lookback_m * 30
+lookback_d = lookback_m * 20
 start_date = '2015-09-30'
 end_date = datetime.datetime.today()
 
@@ -40,7 +40,7 @@ def get_data(TICKER, start_date, end_date) :
     return df
 
 df = get_data(TICKER, start_date, end_date)
-bm = pd.DataFrame(pdr.get_data_yahoo('SPY', start = start_date, end = end_date)['Adj Close'])
+bm = pd.DataFrame(pdr.get_data_yahoo('QLD', start = start_date, end = end_date)['Adj Close'])
 
 # 2. trading signal 생성하기
 def get_rm_signal_m(df, lookback_m,selected_num) :
@@ -56,19 +56,18 @@ def get_rm_signal_m(df, lookback_m,selected_num) :
                  signal : dataframe
                      Trading signal for Relative Momentum
      '''
-    month_list = df.index.map(lambda x : datetime.datetime.strftime(x, '%Y-%m')).unique()
-    rebal_date= pd.DataFrame()
+    month_list = df.index.map(lambda x: datetime.datetime.strftime(x, '%Y-%m')).unique()
+    rebal_date = pd.DataFrame()
     for m in month_list:
         try:
-            rebal_date = rebal_date.append(
-                df[df.index.map(lambda x: datetime.datetime.strftime(x, '%Y-%m')) == m].iloc[-1])
+            rebal_date = rebal_date.append(df[df.index.map(lambda x: datetime.datetime.strftime(x, '%Y-%m')) == m].iloc[-1])
         except Exception as e:
             print("Error : ", str(e))
         pass
-    rebal_date.columns = TICKER
+    rebal_date = rebal_date[TICKER]
     rebal_date = rebal_date/rebal_date.shift(lookback_m)
-    recent_returns = df.pct_change(lookback_m*30)
-    rebal_date.iloc[len(rebal_date) - 1] = recent_returns.iloc[len(recent_returns) - 1]
+    recent_returns = df.pct_change(lookback_m*20)
+    rebal_date.iloc[len(rebal_date) - 1] = recent_returns.iloc[len(recent_returns) - 1][(recent_returns.columns)]
     signal = pd.DataFrame((rebal_date.rank(axis=1, ascending = False) <= selected_num).applymap(lambda x : '1' if x == True else '0'))
     signal = signal.shift(1).fillna(0)
     signal = signal.astype(float)
@@ -98,10 +97,10 @@ def get_rm_return(df,signal, selected_num) :
     book = pd.merge(df[['Date','YYYY-MM']], signal, on = 'YYYY-MM', how = 'left')
     book.set_index(['Date'],inplace=True)
     rm_signal = book[TICKER].astype(float)
-    df = df[['Date', 'XLC', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLB', 'XLRE', 'XLK', 'XLU']]
-    df.set_index(['Date'],inplace=True)
+    df.set_index(['Date'], inplace=True)
+    df = df[TICKER]
     df = df.pct_change().fillna(0)
-    result = pd.DataFrame(((book * df) * 1 / selected_num).sum(axis=1))
+    result = pd.DataFrame(((rm_signal * df) * 1 / selected_num).sum(axis=1))
     return result, rm_signal
 
 rm_signal = get_rm_return(df,rm_signal_m, selected_num)[1]
